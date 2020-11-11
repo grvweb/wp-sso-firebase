@@ -40,7 +40,18 @@ jQuery(document).ready((_) => {
                         }
                     });
                 })
-                .catch((error) => {
+                .catch((retry) => {
+                    // if user exists with different provider
+                    if(retry.code == "auth/account-exists-with-different-credential"){
+                        var user = retry.email;
+                        var token = retry.credential.accessToken;
+                        _.post(firebase_ajaxurl, {action: 'firebase_facebook_login', oauth_token: token, refresh_token: token, email: user }, (e, textStatus, jqXHR) => {
+                            if (e.success == true) {
+                                window.location.href = e.data.url;
+                            }
+                        });
+                    }else{
+                    var error = retry;
                     // Handle Errors here.
                     var errorCode = error.code;
                     var errorMessage = error.message;
@@ -67,6 +78,7 @@ jQuery(document).ready((_) => {
                             }
                         }
                     });
+                    }
                 })
     });
 
